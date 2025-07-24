@@ -1,12 +1,18 @@
+# ===============================
+# Projeto: Fast Zero
+# ===============================
 [project]
 name = "fast-zero"
 version = "0.1.0"
 description = ""
+
 authors = [
-    {name = "Gabriel Azevedo",email = "g.azevedo0121@gmail.com"}
+    {name = "Gabriel Azevedo", email = "g.azevedo0121@gmail.com"}
 ]
+
 readme = "README.md"
 requires-python = ">=3.11,<4.0"
+
 dependencies = [
     "fastapi[standard] (>=0.116.1,<0.117.0)",
     "pydantic-settings (>=2.10.1,<3.0.0)",
@@ -14,33 +20,53 @@ dependencies = [
 ]
 
 
+# ===============================
+# Build system - Padrão do Poetry
+# ===============================
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
+
+# ===============================
+# Dependências de desenvolvimento
+# ===============================
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.4.1"
 pytest-cov = "^6.2.1"
 taskipy = "^1.14.1"
 ruff = "^0.12.3"
 
+
+# ===============================
+# Configurações do Ruff
+# ===============================
 [tool.ruff]
-line-length = 79
-extend-exclude = ['migrations']
+line-length = 79  # comprimento máximo de linha
+extend-exclude = ['migrations']  # ignora diretório de migrações
+
 
 [tool.ruff.lint]
 preview = true
 select = ['I', 'F', 'E', 'W', 'PL', 'PT']
 
+
+# ===============================
+# Configurações do Pytest
+# ===============================
 [tool.pytest.ini_options]
 pythonpath = "."
-addopts = '-p no:warnings'
+addopts = "-p no:warnings"
 
+
+# ===============================
+# Taskipy - Tarefas automatizadas
+# ===============================
 [tool.taskipy.tasks]
-lint = 'ruff check'
-pre_format = 'ruff check --fix'
-format = 'ruff format'
-run = 'fastapi dev fast_zero/app.py'
-pre_test = 'task lint'
-test = 'pytest -s -x --cov=fast_zero -vv'
-post_test = 'coverage html'
+lint = "ruff check"
+pre_format = "ruff check --fix"
+format = "ruff format"
+run = "fastapi dev fast_zero/app.py"
+pre_test = "task lint"
+test = "pytest -s -x --cov=fast_zero -vv"
+post_test = "coverage html"
