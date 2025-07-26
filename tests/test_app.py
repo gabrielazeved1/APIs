@@ -40,7 +40,7 @@ def test_create_user_should_return_409_username_exists__exercicio(
     )
     assert response.status_code == HTTPStatus.CONFLICT
     assert response.json() == {"detail": "Username already exists"}
-
+#usar o nome usuario ja criado na fixture
 
 def test_create_user_should_return_409_email_exists__exercicio(client, user):
     response = client.post(
