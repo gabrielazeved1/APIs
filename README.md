@@ -281,7 +281,7 @@ poetry install --no-root --without dev
 
 ---
 
-## Análise de Segurança de Senhas (Opcional)
+## Análise de Segurança de Senhas 
 
 Para verificar as senhas armazenadas no banco de dados (somente em ambiente de desenvolvimento):
 
