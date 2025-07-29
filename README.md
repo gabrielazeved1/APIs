@@ -1,137 +1,312 @@
-# Guia de Desenvolvimento para o Projeto `fast_zero`
+# Projeto fast_zero: API RESTful com FastAPI
 
-Este guia oferece uma série de comandos essenciais para desenvolver, testar e manter seu projeto FastAPI, utilizando Poetry para gerenciamento de dependências, Ruff para linting e formatação, e Pytest para testes.
+Este repositório apresenta o desenvolvimento de uma API RESTful utilizando o framework web **FastAPI**, focado na criação eficiente de serviços web com tipagem de dados e validação automática. O projeto visa demonstrar proficiência em desenvolvimento de APIs Python, gerenciamento de dependências, testes e práticas de qualidade de código.
+
+## Tecnologias Utilizadas
+
+* **FastAPI**: Framework web moderno e de alta performance para a construção de APIs com Python 3.7+.
+* **SQLAlchemy**: Toolkit SQL e Object Relational Mapper (ORM) para interação com o banco de dados.
+* **Alembic**: Ferramenta de migração de banco de dados para SQLAlchemy, permitindo evoluir o schema do banco de dados de forma controlada.
+* **Poetry**: Ferramenta para gerenciamento de dependências e ambientes virtuais Python, garantindo consistência e reprodutibilidade do projeto.
+* **Pydantic**: Biblioteca para validação e parse de dados usando type hints Python. Essencial para a tipagem dos schemas de requisição e resposta.
+* **Ruff**: Linter e formatador de código Python extremamente rápido, garantindo a padronização e qualidade do código.
+* **Pytest**: Framework de teste completo e flexível para escrever e executar testes unitários e de integração.
+* **Passlib (pwdlib)**: Biblioteca para hashing e verificação de senhas de forma segura.
+* **PyJWT**: Implementação de JSON Web Tokens (JWT) para autenticação segura na API.
+* **Uvicorn**: Servidor ASGI de alta performance para executar aplicações FastAPI.
+* **SQLite**: Banco de dados leve e embarcado, utilizado para o desenvolvimento local.
+
+## Funcionalidades da API
+
+A API `fast_zero` oferece os seguintes endpoints para gerenciamento de usuários e autenticação:
+
+* **`GET /`**:
+    * **Descrição**: Endpoint inicial que retorna uma mensagem de boas-vindas.
+    * **Resposta**: `{"message": "Olá Mundo!"}`
+
+* **`POST /users/`**:
+    * **Descrição**: Cria um novo usuário no sistema.
+    * **Corpo da Requisição**:
+        ```json
+        {
+          "username": "novo_usuario",
+          "email": "email@example.com",
+          "password": "senha_segura"
+        }
+        ```
+    * **Validações**:
+        * Verifica se o `username` ou `email` já estão em uso, retornando um erro `HTTP 409 Conflict`.
+    * **Resposta de Sucesso (HTTP 201 Created)**:
+        ```json
+        {
+          "id": 1,
+          "username": "novo_usuario",
+          "email": "email@example.com"
+        }
+        ```
+
+* **`GET /users/`**:
+    * **Descrição**: Retorna uma lista paginada de usuários.
+    * **Parâmetros de Consulta**:
+        * `skip`: Número de registros a serem pulados (para paginação).
+        * `limit`: Número máximo de registros a serem retornados.
+    * **Resposta**:
+        ```json
+        [
+          {
+            "id": 1,
+            "username": "usuario1",
+            "email": "usuario1@example.com"
+          },
+          {
+            "id": 2,
+            "username": "usuario2",
+            "email": "usuario2@example.com"
+          }
+        ]
+        ```
+
+* **`PUT /users/{user_id}`**:
+    * **Descrição**: Atualiza os dados de um usuário existente.
+    * **Requer**: Autenticação via `Bearer Token` (JWT). O usuário autenticado deve ter permissão para modificar o `user_id` especificado (i.e., ser o próprio usuário ou ter permissão de administrador, se implementado).
+    * **Parâmetros de Path**:
+        * `user_id`: ID do usuário a ser atualizado.
+    * **Corpo da Requisição**:
+        ```json
+        {
+          "username": "novo_nome_usuario",
+          "email": "novo_email@example.com",
+          "password": "nova_senha_segura"
+        }
+        ```
+    * **Validações**:
+        * Verifica se o novo `username` ou `email` já estão em uso por outro usuário.
+        * Retorna `HTTP 404 Not Found` se o usuário não for encontrado.
+        * Retorna `HTTP 401 Unauthorized` se o token for inválido ou ausente.
+        * Retorna `HTTP 403 Forbidden` se o usuário autenticado não tiver permissão.
+    * **Resposta de Sucesso (HTTP 200 OK)**:
+        ```json
+        {
+          "id": 1,
+          "username": "novo_nome_usuario",
+          "email": "novo_email@example.com"
+        }
+        ```
+
+* **`DELETE /users/{user_id}`**:
+    * **Descrição**: Exclui um usuário do sistema.
+    * **Requer**: Autenticação via `Bearer Token` (JWT). O usuário autenticado deve ter permissão para excluir o `user_id` especificado.
+    * **Parâmetros de Path**:
+        * `user_id`: ID do usuário a ser excluído.
+    * **Validações**:
+        * Retorna `HTTP 404 Not Found` se o usuário não for encontrado.
+        * Retorna `HTTP 401 Unauthorized` se o token for inválido ou ausente.
+        * Retorna `HTTP 403 Forbidden` se o usuário autenticado não tiver permissão.
+    * **Resposta de Sucesso (HTTP 204 No Content)**: Não retorna conteúdo.
+
+* **`POST /token`**:
+    * **Descrição**: Endpoint para autenticação de usuários, retornando um JWT (JSON Web Token) para acesso aos endpoints protegidos.
+    * **Corpo da Requisição (Form Data - `application/x-www-form-urlencoded`)**:
+        ```
+        username=seu_email@example.com&password=sua_senha
+        ```
+    * **Resposta de Sucesso (HTTP 200 OK)**:
+        ```json
+        {
+          "access_token": "seu_token_jwt_aqui",
+          "token_type": "bearer"
+        }
+        ```
+    * **Resposta de Erro (HTTP 401 Unauthorized)**: Credenciais inválidas.
+
+## Configuração e Execução
+
+Siga os passos abaixo para configurar e executar o projeto em seu ambiente local.
+
+### Pré-requisitos
+
+* Python 3.11 (ou superior)
+* Poetry
+
+### 1. Clonar o Repositório (Exemplo, se fosse um repositório Git real)
+
+```bash
+git clone git@github.com:gabrielazeved1/APIs.git
+cd fast_zero
+```
+## 2. Configuração do Ambiente
+
+Ajuste a versão do Python para garantir a compatibilidade do Poetry:
+
+```bash
+poetry env use python3.11
+```
+
+Instale as dependências do projeto:
+
+```bash
+poetry install
+```
 
 ---
 
-## 1. Configuração Inicial do Projeto
+## 3. Variáveis de Ambiente
 
-Se você está começando este projeto do zero ou o clonou de um repositório, siga estes passos para configurá-lo:
+Crie um arquivo `.env` na raiz do projeto, baseado no `example.env`, e configure a URL do banco de dados e a chave secreta para JWT:
 
-1.  **Crie o Projeto (se necessário):**
-    ```bash
-    poetry new --flat fast_zero
-    cd fast_zero
-    ```
-    *Isso gera a estrutura básica do projeto.*
-
-2.  **Ajuste a Versão do Python:**
-    Edite o arquivo `pyproject.toml`. Na seção `[project]`, localize e/ou adicione a linha `requires-python` para especificar a compatibilidade com o Python 3.11 (e futuras versões 3.x):
-    ```toml
-    # pyproject.toml
-    [project]
-    # ...
-    requires-python = ">=3.11,<4.0"
-    # ...
-    ```
-    *Este ajuste é crucial para evitar conflitos de dependências, como o que ocorreu com `taskipy`.*
-
-3.  **Instale as Dependências de Produção (FastAPI):**
-    ```bash
-    poetry add "fastapi[standard] (>=0.116.0,<0.117.0)"
-    ```
-    *Isso adiciona o FastAPI e suas dependências essenciais para a execução da sua aplicação.*
-
-4.  **Instale as Dependências de Desenvolvimento:**
-    ```bash
-    poetry add --group dev pytest pytest-cov taskipy ruff
-    ```
-    *Estas são ferramentas importantes para testes, linting (análise de código) e formatação, úteis durante o desenvolvimento.*
-
-5.  **Configure as Ferramentas no `pyproject.toml`:**
-    Garanta que as seções `[tool.ruff]`, `[tool.ruff.lint]`, `[tool.pytest.ini_options]` e `[tool.taskipy.tasks]` estejam configuradas conforme o exemplo fornecido anteriormente. Isso personaliza o comportamento do linter, testes e das tarefas personalizadas.
+```ini
+# .env
+DATABASE_URL="sqlite:///database.db"
+SECRET_KEY="sua_chave_secreta_segura_aqui"
+ALGORITHM="HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+```
 
 ---
 
-## 2. Rodando a Aplicação (Desenvolvimento)
+## 4. Migrações do Banco de Dados
 
-Para iniciar sua aplicação FastAPI e vê-la em ação:
+Aplique as migrações do banco de dados para criar as tabelas necessárias:
 
-* **Inicie o Servidor de Desenvolvimento:**
-    ```bash
-    poetry run task run
-    ```
-    *Este comando, configurado via `taskipy`, executa `fastapi dev fast_zero/app.py`. O servidor Uvicorn iniciará, monitorando suas alterações de código e recarregando automaticamente. A URL de acesso será exibida no terminal (geralmente `http://127.0.0.1:8000`).*
-    ```bash
-    uvicorn fast_zero.app:app --port 8000 --reload
-    ```
-    *Faz a mesma coisa que "run = 'fastapi dev fast_zero/app.py' "*
-    
-* **Para parar o servidor:** Pressione `Ctrl + C` no terminal onde o servidor está rodando.
+```bash
+poetry run alembic upgrade head
+```
 
 ---
 
-## 3. Mantendo a Qualidade do Código
+## 5. Executar a Aplicação
 
-É fundamental manter seu código limpo, padronizado e sem erros de estilo. Utilizamos o Ruff para isso.
+Inicie o servidor Uvicorn:
 
-* **Verifique o Código (Linting):**
-    ```bash
-    poetry run task lint
-    ```
-    *Executa `ruff check`, que analisa seu código em busca de erros de estilo, bugs comuns e inconsistências. Ele apenas lista os problemas encontrados, sem corrigi-los.*
+```bash
+poetry run task run
+# ou diretamente:
+poetry run uvicorn fast_zero.app:app --reload
+```
 
-* **Corrija Automaticamente (Pré-Formatação):**
-    ```bash
-    poetry run task pre_format
-    ```
-    *Executa `ruff check --fix`. Este comando tenta corrigir automaticamente a maioria dos problemas de estilo e formatação que o Ruff pode resolver (como espaços extras, ordenação de imports, etc.).*
+Acesse em: [http://127.0.0.1:8000](http://127.0.0.1:8000)  
+Documentação Swagger UI: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)  
+Documentação ReDoc: [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
 
-* **Formate o Código Completamente:**
-    ```bash
-    poetry run task format
-    ```
-    *Executa `ruff format`. Este comando aplica um conjunto mais robusto de regras de formatação para padronizar todo o seu código. É uma ótima prática rodá-lo regularmente para manter a consistência.*
+Para parar o servidor, pressione `Ctrl + C`.
 
 ---
 
-## 4. Executando os Testes
+## Mantendo a Qualidade do Código
 
-Para garantir que sua aplicação funciona como esperado e que novas alterações não introduziram bugs:
+Utilizamos o **Ruff** para linting e formatação de código.
 
-* **Execute Todos os Testes:**
-    ```bash
-    poetry run task test
-    ```
-    *Este é o comando principal para seus testes. Ele primeiro executa o `lint` (graças à configuração `pre_test` no `pyproject.toml`) para garantir que o código esteja limpo, e só então roda o `pytest` com as opções de cobertura de código. A saída indicará se os testes passaram, falharam e qual a porcentagem de cobertura do código.*
+### Verificar Problemas
+
+```bash
+poetry run task lint
+# ou:
+poetry run ruff check .
+```
+
+### Corrigir Problemas Automaticamente (Pré-formatação)
+
+```bash
+poetry run task pre_format
+# ou:
+poetry run ruff check . --fix
+```
+
+### Formatar Código Completamente
+
+```bash
+poetry run task format
+# ou:
+poetry run ruff format .
+```
+
+---
+
+## Testes
+
+O projeto inclui testes para garantir a corretude das funcionalidades da API.
+
+### Executar Testes
+
+```bash
+poetry run task test
+# ou:
+poetry run pytest --cov=fast_zero --cov-report=term-missing tests/
+```
+
+### Detalhes dos Arquivos de Teste
+
+- `tests/test_app.py`: Testes de integração dos endpoints
+- `tests/test_db.py`: Testes de operações básicas no banco
+- `tests/test_security.py`: Testes de hash de senha e JWT
+- `tests/conftest.py`: Fixtures para testes com banco SQLite em memória
 
 ---
 
-## 5. Gerenciamento de Dependências
+## Gerenciamento de Dependências com Poetry
 
-O Poetry facilita a adição e remoção de bibliotecas do seu projeto.
+### Adicionar uma dependência de produção:
 
-* **Adicionar uma Nova Dependência de Produção:**
-    ```bash
-    poetry add nome-da-biblioteca
-    # Exemplo: poetry add requests
-    ```
+```bash
+poetry add nome-da-biblioteca
+# Exemplo:
+poetry add requests
+```
 
-* **Adicionar uma Nova Dependência de Desenvolvimento:**
-    ```bash
-    poetry add --group dev nome-da-biblioteca
-    # Exemplo: poetry add --group dev ipython
-    ```
+### Adicionar uma dependência de desenvolvimento:
 
-* **Remover uma Dependência:**
-    ```bash
-    poetry remove nome-da-biblioteca
-    ```
+```bash
+poetry add --group dev nome-da-biblioteca
+# Exemplo:
+poetry add --group dev ipython
+```
 
-* **Instalar Dependências de um Projeto (se você clonou):**
-    ```bash
-    poetry install
-    ```
-    *Este comando lê os arquivos `pyproject.toml` e `poetry.lock` e instala todas as dependências necessárias para o projeto, garantindo que você tenha o ambiente correto.*
+### Remover uma dependência:
+
+```bash
+poetry remove nome-da-biblioteca
+```
+
+### Instalar dependências de um projeto clonado:
+
+```bash
+poetry install
+```
+
+### Instalar apenas dependências de produção:
+
+```bash
+poetry install --no-root --without dev
+```
 
 ---
-# Acessar o banco de dados
+
+## Análise de Segurança de Senhas (Opcional)
+
+Para verificar as senhas armazenadas no banco de dados (somente em ambiente de desenvolvimento):
+
+### Acessar o shell do Poetry:
+
+```bash
+poetry shell
+```
+
+### Iniciar o cliente SQLite:
+
 ```bash
 sqlite3 database.db
 ```
-**Analisar segurança de senha apos criar usuarios**
-```bash
+
+### Comandos no SQLite:
+
+```sql
+.tables
 SELECT * FROM users;
+.quit
 ```
 
-Este guia cobre os comandos mais frequentes e essenciais para o seu desenvolvimento. Mantenha-o como referência para um fluxo de trabalho eficiente!# APIs
+### Sair do shell Poetry:
+
+```bash
+exit
+```
