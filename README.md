@@ -125,5 +125,13 @@ O Poetry facilita a adição e remoção de bibliotecas do seu projeto.
     *Este comando lê os arquivos `pyproject.toml` e `poetry.lock` e instala todas as dependências necessárias para o projeto, garantindo que você tenha o ambiente correto.*
 
 ---
+# Acessar o banco de dados
+```bash
+sqlite3 database.db
+```
+**Analisar segurança de senha apos criar usuarios**
+```bash
+SELECT * FROM users;
+```
 
 Este guia cobre os comandos mais frequentes e essenciais para o seu desenvolvimento. Mantenha-o como referência para um fluxo de trabalho eficiente!# APIs

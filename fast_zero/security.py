@@ -12,18 +12,18 @@ from sqlalchemy.orm import Session
 from fast_zero.database import get_session
 from fast_zero.models import User
 
-SECRET_KEY = 'your-secret-key'  # Isso é provisório, vamos ajustar!
-ALGORITHM = 'HS256'
+SECRET_KEY = "your-secret-key"  # Isso é provisório, vamos ajustar!
+ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 pwd_context = PasswordHash.recommended()
 
 
 def create_access_token(data: dict):
     to_encode = data.copy()
-    expire = datetime.now(tz=ZoneInfo('UTC')) + timedelta(
+    expire = datetime.now(tz=ZoneInfo("UTC")) + timedelta(
         minutes=ACCESS_TOKEN_EXPIRE_MINUTES
     )
-    to_encode.update({'exp': expire})
+    to_encode.update({"exp": expire})
     encoded_jwt = encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
@@ -36,7 +36,7 @@ def verify_password(plain_password: str, hashed_password: str):
     return pwd_context.verify(plain_password, hashed_password)
 
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl='token')
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 def get_current_user(
@@ -45,13 +45,13 @@ def get_current_user(
 ):
     credentials_exception = HTTPException(
         status_code=HTTPStatus.UNAUTHORIZED,
-        detail='Could not validate credentials',
-        headers={'WWW-Authenticate': 'Bearer'},
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
     )
 
     try:
         payload = decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        subject_email = payload.get('sub')
+        subject_email = payload.get("sub")
 
         if not subject_email:
             raise credentials_exception
@@ -59,9 +59,7 @@ def get_current_user(
     except DecodeError:
         raise credentials_exception
 
-    user = session.scalar(
-        select(User).where(User.email == subject_email)
-    )
+    user = session.scalar(select(User).where(User.email == subject_email))
 
     if not user:
         raise credentials_exception
